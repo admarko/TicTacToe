@@ -1,3 +1,5 @@
+# Simple Tic Tac Toe Game
+
 class Board:
 	def __init__(self):
 		self.game_board = [["-","-","-"],["-","-","-"],["-","-","-"]]
@@ -12,49 +14,57 @@ class Board:
 	def add_move(self, move, r, c):
 		self.game_board[r][c] = move
 		self.moves += 1
+		self.check_board(move)
 
+	def row_winner(self, move):
+		for i in range(3):
+			if self.game_board[i][0] == self.game_board[i][1] == self.game_board[i][2] == move:
+				return True
+		return False
+
+	def col_winner(self, move):
+		for i in range(3):
+			if self.game_board[0][i] == self.game_board[1][i] == self.game_board[2][i] == move:
+				return True
+		return False
+
+	def diag_winner(self, move):
+		return (self.game_board[0][0] == self.game_board[1][1] == self.game_board[2][2] == move) \
+		or (self.game_board[2][0] == self.game_board[1][1] == self.game_board[0][2] == move)
+
+	def is_game_won(self, move):
+		return self.row_winner(move) or self.col_winner(move) or self.diag_winner(move)
+			
 	def is_full(self):
-		if self.moves == 9:
-			print("Board is full - game over!")
+		return self.moves == 9
+
+	def check_board(self, move):
+		if self.is_full() and not self.is_game_won():
+			print "\nTie! The Board is full - game over!"
+			self.print_board()
 			exit()
-
-	def row_winner(self):
-		for i in range(3):
-			if self.game_board[i][0] == self.game_board[i][1] == self.game_board[i][2]:
-				return True
-		return False
-
-	def col_winner(self):
-		for i in range(3):
-			if self.game_board[0][i] == self.game_board[1][i] == self.game_board[2][i]:
-				return True
-		return False
-
-	def diag_winner(self):
-		return ((self.game_board[0][0] == self.game_board[1][1] == self.game_board[2][2]) \
-		or (self.game_board[2][0] == self.game_board[1][1] == self.game_board[0][2]))
-
-	def is_game_won(self):
-		if self.row_winner() or self.col_winner() or self.diag_winner():
-			print "Game Won!"
+		elif self.is_game_won(move):
+			winner = player_name if move == "X" else "AI"
+			print "\nGame over - " + winner + " wins!!!"
+			self.print_board()
 			exit()
-
-
-
+		
+			
 def simple_ai(board):
+	print "\nAI's move:"
 	for i in range(3):
 		for j in range(3):
 			if board.game_board[i][j] == "-":
 				board.add_move("O", i, j)
 				return
-	
 
+# Method to 	
 def user_move(board):
 	while True:
 		print "Your turn, where would you like to move?"
 		try:
-			row = int(input("row: "))
-			col = int(input("col: "))
+			row = int(raw_input("row: "))
+			col = int(raw_input("col: "))
 		except NameError:
 			print("Must use integers to play tic tac toe!")
 			continue
@@ -67,22 +77,18 @@ def user_move(board):
 			board.print_board()
 			return
 
+# Global Variables
+player_name = "user"
 
-def main():
-	ongoing = True
+
+# Main game loop
+if __name__ == "__main__":
+	player_name = str(raw_input("\nWelcome to Tic-Tac-Toe. What is your name: ")).capitalize()
 	b = Board()
-	print "\nWelcome to Tic-Tac-Toe. Make your first move"
+	b.print_board()
+	ongoing = True
 	while ongoing:
-		b.is_game_won()
-		b.is_full()	
 		user_move(b)
-		b.is_game_won()
-		b.is_full()
 		simple_ai(b)
 		b.print_board()
-
-
-if __name__ == "__main__":
-	main()
-
 
