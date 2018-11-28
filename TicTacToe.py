@@ -53,10 +53,18 @@ class Board:
 			self.print_board()
 			exit()
 		elif self.is_game_won(move):
-			winner = player_name if move == "X" else "AI"
-			print "\nGame over - " + winner + " wins!!!"
+			if move == "X":
+				player_score += 1
+				winner = player_name
+			else:
+				ai_score += 1
+				winner = "AI"			
 			self.print_board()
-			exit()
+			again = str(raw_input("\nWould you like to play again? [Y/N]: ")).capitalize()
+			if again == "N":
+				exit()
+			else:
+				print("play again...")
 
 #############################
 #### AI Methods #############
@@ -129,6 +137,8 @@ def user_move(board):
 
 # Global Variables
 player_name = "user"
+player_score = 0
+ai_score = 0
 
 
 # Main game loop
