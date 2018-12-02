@@ -13,12 +13,19 @@ class Board:
 	def __init__(self):
 		self.game_board = [["-","-","-"],["-","-","-"],["-","-","-"]]
 		self.moves = 0
-
+		self.player_score = [0,0,0]
+		self.ai_score = [0,0,0]
+		self.leader = ""
+	
 	def print_board(self):
 		print "  1 2 3"
 		for i in range(3):
 			print str(i+1) + " " + "|".join(self.game_board[i])
 		print ""
+
+	def reset_board(self):
+		self.game_board = [["-","-","-"],["-","-","-"],["-","-","-"]]
+		self.moves = 0
 
 	def add_move(self, move, r, c):
 		self.game_board[r][c] = move
@@ -47,24 +54,47 @@ class Board:
 	def is_full(self):
 		return self.moves == 9
 
+	def assign_current_leader(self):
+		if self.player_score[0] > self.ai_score[0]:
+			self.leader = player_name
+		elif self.player_score[0] < self.ai_score[0]:
+			self.leader = "AI"
+		else:
+			self.leader = ""
+
+	def update_scores(self, move):
+		if move == "X":
+			self.player_score[0] += 1		# player win
+			self.ai_score[1] += 1			# ai lose
+			round_winner = player_name
+		else:
+			self.ai_score[0] += 1			# ai win
+			self.player_score[1] += 1		# player lose
+			round_winner = "AI"		
+
+		return round_winner
+
 	def check_board(self, move):
 		if self.is_full() and not self.is_game_won():
 			print "\nTie! The Board is full - game over!"
 			self.print_board()
-			exit()
+			self.player_score[2] += 1
+			self.ai_score[2] += 1
+
 		elif self.is_game_won(move):
-			if move == "X":
-				player_score += 1
-				winner = player_name
-			else:
-				ai_score += 1
-				winner = "AI"			
+			round_winner = self.update_scores(move)
 			self.print_board()
-			again = str(raw_input("\nWould you like to play again? [Y/N]: ")).capitalize()
-			if again == "N":
+			print round_winner + " wins this round!"
+			self.assign_current_leader()
+
+			if str(raw_input("Would you like to play again? [Y/N]: ")).capitalize() == "N":
+				print "*Final score* "
+				print "{}: {}-{}-{}".format(player_name, self.player_score[0], self.player_score[1], self.player_score[2])
+				print "AI: {}-{}-{}".format(self.ai_score[0], self.ai_score[1], self.ai_score[2])
+				print self.leader + " wins!\n" if self.leader else "Tie - Everyone's a winner!"
 				exit()
 			else:
-				print("play again...")
+				self.reset_board() # loser starts next game
 
 #############################
 #### AI Methods #############
@@ -110,6 +140,7 @@ def simple_ai(board):
 		for j in range(3):
 			if board.game_board[i][j] == "-":
 				board.add_move("O", i, j)
+				board.print_board()
 				return
 
 #############################
@@ -135,20 +166,13 @@ def user_move(board):
 			board.print_board()
 			return
 
-# Global Variables
-player_name = "user"
-player_score = 0
-ai_score = 0
-
-
 # Main game loop
 if __name__ == "__main__":
-	player_name = str(raw_input("\nWelcome to Tic-Tac-Toe. What is your name: ")).capitalize()
+	player_name = str(raw_input("\nWelcome to Tic-Tac-Toe. What is your name: \n")).capitalize()
 	b = Board()
+	print "\nHi " + player_name + ", you get to start"
 	b.print_board()
-	ongoing = True
-	while ongoing:
+	while True:
 		user_move(b)
 		simple_ai(b)
-		b.print_board()
 
