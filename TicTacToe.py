@@ -6,7 +6,6 @@ Last Modified December 2018
 '''
 import random
 
-
 #############################
 #### Board Class ####
 #############################
@@ -114,45 +113,17 @@ class Board:
 #############################
 #### AI Methods #############
 #############################
-
-# def two_move_one_dash(three, move):
-# 	return three.count(move) == 2 and three.count("-") == 1
-
-# def ai_win_next_diag(board, move):
-# 	diag1 = [board.game_board[0][0], board.game_board[1][1], board.game_board[2][2]]
-# 	diag2 = [board.game_board[0][2], board.game_board[1][1], board.game_board[2][0]]
-# 	if two_move_one_dash(diag1, move) or two_move_one_dash(diag2, move):
-# 		print move + " can win next turn (Diag)"
-# 		return True
-# 	else: 
-# 		return False
-
-# def ai_win_next_col(board, move):
-# 	col1 = [board.game_board[0][0], board.game_board[1][0], board.game_board[2][0]]
-# 	col2 = [board.game_board[0][1], board.game_board[1][1], board.game_board[2][1]]
-# 	col3 = [board.game_board[0][2], board.game_board[1][2], board.game_board[2][2]]
-# 	if two_move_one_dash(col1, move) or two_move_one_dash(col2, move) or two_move_one_dash(col3, move):
-# 		print move + " can win next turn (COL)"
-# 		return True
-# 	else: 
-# 		return False
-
-# def ai_win_next_row(board, move):
-# 	# check for row winner
-# 	if two_move_one_dash(board.game_board[0], move) or two_move_one_dash(board.game_board[1], move) or two_move_one_dash(board.game_board[2], move):
-# 		print move + " can win next turn (row)"
-# 		return True
-# 	else: 
-# 		return False
-			
 	
+# Minimax algorithm (helper for the unbeatable AI)
+def minimax(board, i=0, q=False):
+	print "minimax"
 
 def get_ai_type(ai_name):
 
 	# Iteratively scrolls from top left to bottom right corner and moves in the next
 	# open spot	
 	def simple_ai(board):
-		print "\nAI's move:"
+		print "\nSimple AI's move:"
 		for i in range(3):
 			for j in range(3):
 				if board.game_board[i][j] == "-":
@@ -162,7 +133,7 @@ def get_ai_type(ai_name):
 
 	# AI that randomly places valid move
 	def random_ai(board):
-		print "\nAI's move:"
+		print "\nRandom AI's move:"
 		while True:
 			row = random.randint(0,2)
 			col = random.randint(0,2)
@@ -171,8 +142,36 @@ def get_ai_type(ai_name):
 				board.print_board()
 				return
 
+	def unbeatable_ai(board):
+		print "\nUnbeatable AI's move:"
+		best_value = float('-inf')
+		best_move_row = -1
+		best_move_col = -1
+
+		for i in range(3):
+			for j in range(3):
+				if board[i][j] == "-":
+                	board[i][j] = "O"; 
+	                move_value = minimax(board, 0, false); 
+  					board[i][j] = '-' 
+
+	                if (move_value > best_value) 
+	                    best_move_row = i 
+	                    best_move_col = j
+	                    best_value = move_value
+	    board.add_move("0", best_move_row, best_move_col)
+	    board.print_board()
+	    return 
+                
+
+
+
+
+
 	if ai_name == "random_ai":
 		return random_ai
+	elif ai_name == "unbeatable_ai":
+		return unbeatable_ai
 	else:
 		return simple_ai
 
@@ -203,13 +202,15 @@ def user_move(board):
 
 def select_opponent():
 	while "Invalid Response":
-		ai_input = str(raw_input("\nWhich AI do you want to play against? Random or Simple [R/S]: \n")).capitalize()
+		ai_input = str(raw_input("\nWhich AI do you want to play against? Random, Simple, or Unbeatable [R/S/U]: \n")).capitalize()
 		if ai_input == "R":
 			return "random_ai"
 		elif ai_input == "S":
 			return "simple_ai"
+		elif ai_input == "U":
+			return "unbeatable_ai"
 		else:
-			print("Invalid option, please select either [R] for Random or [S] for Simple")
+			print("Invalid option, please select either [R] for Random, [S] for Simple or [U] Unbeatable")
 
 # Main game loop
 if __name__ == "__main__":
