@@ -1,8 +1,8 @@
 '''
-Simple Tic Tac Toe Game that lets users play in Terminal vs. different AIs
+Simple Tic Tac Toe game that lets users play in Terminal vs. 3 different AIs
 By Alex Markowitz
 github.com/admarko/TicTac/Toe
-Last Modified December 2018
+Last Modified January 2019
 '''
 import random
 
@@ -80,15 +80,22 @@ class Board:
 			
 		return round_winner
 
-	def end_of_game(self, ):
-		if str(raw_input("Would you like to play again? [Y/N]: ")).capitalize() == "N":
-			print "*Final score* "
-			print "{}: {}-{}-{}".format(player_name, self.player_score[0], self.player_score[1], self.player_score[2])
-			print "AI: {}-{}-{}".format(self.ai_score[0], self.ai_score[1], self.ai_score[2])
-			print self.leader + " wins!\n" if self.leader else "Tie - Everyone's a winner!"
-			exit()
-		else:
-			self.reset_board() # loser starts next game
+	def end_of_game(self):
+		while True:
+			answer = str(raw_input("Would you like to play again? [Y/N]: ")).capitalize()
+			if answer == "N":
+				print "*Final score* "
+				print "{}: {}-{}-{}".format(player_name, self.player_score[0], self.player_score[1], self.player_score[2])
+				print "AI: {}-{}-{}".format(self.ai_score[0], self.ai_score[1], self.ai_score[2])
+				print self.leader + " wins!\n" if self.leader else "Tie - Everyone's a winner!"
+				exit()
+			elif answer == "Y":
+				self.reset_board() # loser starts next game
+				break
+			else:
+				print("Invalid option, please select either [Y] for Yes or [N] for No")
+
+
 
 	def check_board(self, move):
 		if self.is_full() and not self.is_game_won(move):
@@ -114,10 +121,54 @@ class Board:
 #### AI Methods #############
 #############################
 	
-# Minimax algorithm (helper for the unbeatable AI)
-def minimax(board, i=0, q=False):
-	print "minimax"
+# Helper for Minimax algo for the Unbeatable AI
+def evaluate(board):
+	if board.is_game_won("O"):
+		return 10
+	elif board.is_game_won("X"):
+		return -10
+	return 0
 
+
+# Minimax algorithm (helper for the unbeatable AI)
+# Help from: https://www.geeksforgeeks.org/minimax-algorithm-in-game-theory-set-3-tic-tac-toe-ai-finding-optimal-move/
+def minimax(board, depth, isMax):
+	score = evaluate(board)
+
+	#maximizer wins, return evaluated score
+	if score == 10:				
+		return score
+	
+	#minimizer won, return evaluated score
+	if score == -10:
+		return score 			
+	
+	# if no more moves and no winner, then its a tie
+	if board.is_full():			
+		return 0
+
+	# if this is maximizer's move
+	if isMax:
+		best = -1000
+		for i in range(3):
+			for j in range(3):
+				if board.game_board[i][j] == "-":
+					board.game_board[i][j] = "X"
+					best = max(best, minimax(board, depth+1, not isMax))
+					board.game_board[i][j]= "-"
+		return best
+
+	else:	# the minimizer's move
+		best = 1000
+		for i in range(3):
+			for j in range(3):
+				if board.game_board[i][j] == "-":
+					board.game_board[i][j] = "O"
+					best = min(best, minimax(board, depth+1, not isMax))
+					board.game_board[i][j] = "-"
+		return best
+
+# Choose which AI to play against based on user input
 def get_ai_type(ai_name):
 
 	# Iteratively scrolls from top left to bottom right corner and moves in the next
@@ -150,22 +201,20 @@ def get_ai_type(ai_name):
 
 		for i in range(3):
 			for j in range(3):
-				if board[i][j] == "-":
-                	board[i][j] = "O"; 
-	                move_value = minimax(board, 0, false); 
-  					board[i][j] = '-' 
+				if board.game_board[i][j] == "-":
+					board.game_board[i][j] = "O" 
+	                move_value = minimax(board, 0, False)
+	                board.game_board[i][j] = '-'
 
-	                if (move_value > best_value) 
+	                if (move_value > best_value):
 	                    best_move_row = i 
 	                    best_move_col = j
 	                    best_value = move_value
-	    board.add_move("0", best_move_row, best_move_col)
-	    board.print_board()
-	    return 
-                
 
-
-
+		board.add_move("O", best_move_row, best_move_col)
+		board.print_board()
+		return 
+              
 
 
 	if ai_name == "random_ai":
@@ -223,4 +272,3 @@ if __name__ == "__main__":
 	while True:
 		user_move(b)
 		ai_move(b)
-
